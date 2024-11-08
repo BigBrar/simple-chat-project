@@ -10,7 +10,33 @@ def generate_auth_token(length=32):
     
     return token
 
+def read_file():
+    with open('users.json','r')as file:
+        data = json.load(file)
+        return data
 
+def write_new_user(form):
+    data = read_file()
+    new_user = {
+        'username':form['username'], 
+        'password':form['password'], 
+        'email':form['email'], 
+        'authtoken': generate_auth_token()
+        }
+    for user in data:
+        if user['username'] == form['username'] or user['email'] == form['email']:
+            return {'status':400, 'result':'username or email already exists' }
+    data.append(new_user)
+    with open('users.json','w')as file:
+        json.dump(data,file)
+    return {'status':200, 'result':'new account has been created' }
+
+def read_existing_user(form):
+    data = read_file()
+    for user in data:
+        if user['username'] == form['username'] and user['password'] == form['password']:
+            return {'status':200, 'result':'login success', 'authtoken':user['authtoken'] }
+    return {'status':404, 'result':'invalid username or password' }
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 
@@ -23,26 +49,14 @@ def method_login():
     if request.method == 'GET':
         return 'wrong method my friend, WRONG METHOD !!'
     form = request.get_json()
-    print('Form = ',form)
-    authtoken = generate_auth_token()
-    with open('auth-lab.json','w')as file:
-        json.dump({
-            'username':form['entered_username'],
-            'password':form['entered_password'],
-            'authtoken':authtoken
-            },file)
-    return {
-        'status':200,
-        'result':'login success',
-        'authtoken':authtoken
-        }
+    response = read_existing_user(form)
+    return response
 
 @app.route('/signup',methods=['POST'])
 def post_method():
-    form = request.get_json()
-    username = form['entered_username']
-    password = form['entered_password']
-    return "you ahve been submitted "
+    response  = request.get_json()
+    print('new user has been created')
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
