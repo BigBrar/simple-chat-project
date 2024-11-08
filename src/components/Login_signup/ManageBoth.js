@@ -25,7 +25,7 @@ export default function ManageBoth(){
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 'entered_username' : credentials.username, 'entered_password' : credentials.password })
+      body: JSON.stringify({ 'username' : credentials.username, 'password' : credentials.password, 'email':credentials.email })
   };
   try {
     const response = await fetch(credentials.url, requestOptions);
@@ -33,9 +33,14 @@ export default function ManageBoth(){
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    console.log("Authtoken = ", data['authtoken']);
-    localStorage.setItem('authToken',data['authtoken']);
-    window.location.href = window.location.href;
+    if (data.status != 200){
+        console.log('something went wrong with the request, here is the server response')
+        console.log(data.result)
+    }
+    if (data.authtoken){
+        console.log("Authtoken = ", data['authtoken']);
+        localStorage.setItem('authToken',data['authtoken']);
+        window.location.href = window.location.href;}
 
 } catch (error) {
     console.error("Error occurred:", error);
@@ -47,7 +52,7 @@ export default function ManageBoth(){
      
      {showLogin && <div className='grid justify-center items-center text-center h-screen bg-black text-black'>
       <h1 onClick={switchAuthenticationMode} className='text-2xl text-white'>Login</h1>
-        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/login',username:username.current.value, password:password.current.value})} className="grid gap-10 ">
+        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/login',username:username.current.value, password:password.current.value, email:'none'})} className="grid gap-10 ">
           <input ref={username} className="" type="text" placeholder="Username" />
           <input ref={password} className="" type="password" placeholder="Password" />
           <input className="h-10 w-full bg-blue-500 text-white rounded cursor-pointer" type="submit" value="Submit" />
@@ -56,10 +61,10 @@ export default function ManageBoth(){
       
       {showSignUP && <div className='grid justify-center items-center text-center h-screen bg-black text-black'>
       <h1 onClick={switchAuthenticationMode} className='text-2xl text-white'>Sign Up</h1>
-        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/signup',username:signupUsername.current.value, password:signupPassword.current.value, email:email})} className="grid gap-10 ">
+        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/signup',username:signupUsername.current.value, password:signupPassword.current.value, email:email.current.value})} className="grid gap-10 ">
           <input ref={signupUsername} className="" type="text" placeholder="Username" />
-          <input ref={signupPassword} className="" type="text" placeholder="Email" />
-          <input ref={email} className="" type="password" placeholder="Password" />
+          <input ref={email}  className="" type="text" placeholder="Email" />
+          <input ref={signupPassword} className="" type="password" placeholder="Password" />
           <input className="" type="password" placeholder="Confirm password" />
           <input className="h-10 w-full bg-blue-500 text-white rounded cursor-pointer" type="submit" value="Submit" />
         </form>
