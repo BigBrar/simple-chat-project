@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 import websockets
 
 clients = []
@@ -31,17 +32,30 @@ async def accept_connection(websocket,path):
             data = json.load(file)
         
         for user in data:
-            print(f'user = {user} {username}')
             if user['username'] == username:
                 for chat_user in user['chats']:
                     if chat_user['username'] == chat_to_extract:
                         whole_chat_msg = json.dumps(chat_user['messages'])
                         await websocket.send(whole_chat_msg)
                         print('chat extracted - ',whole_chat_msg)
+                        return 0
+                user['chats'].append({'username':chat_to_extract, 'messages':[]})
+                updated_data = data
+                with open('chats.json','w')as file:
+                    json.dump(updated_data, file)
+                await websocket.send([])
+                return 0
+        updated_data = {"username": username, "chats": [{'username':chat_to_extract, 'messages':[]}]}
+        data.append(updated_data)
+        with open('chats.json','w')as file:
+                json.dump(data, file)
+                await websocket.send([])
+                        
     elif message['action'] == 'MSG_SEND':
         with open('users.json','r')as file:
             data = json.load(file)
         authtoken = message['authtoken']
+        receiver = message['receiver']
         for user in data:
             if user['authtoken'] == authtoken:
                 username = user['username']
@@ -54,9 +68,19 @@ async def accept_connection(websocket,path):
             print(f'user = {user} {username}')
             if user['username'] == username:
                 for chat_user in user['chats']:
-                    if chat_user['username'] == 'lovepreet':
+                    if chat_user['username'] == receiver:
                         current_messages = chat_user['messages']
-                        current_messages.append(message['msg_body'])
+                        current_messages.append({'sender':username, 'message':message['msg_body']})
+                        chat_user['messages'] = current_messages
+                    else:
+                        pass
+                        # print('no such chat user ',chat_user)
+        for user in data:
+            if user['username'] == receiver:
+                for chat_user in user['chats']:
+                    if chat_user['username'] == username:
+                        current_messages = chat_user['messages']
+                        current_messages.append({'receiver':username, 'message':message['msg_body']})
                         chat_user['messages'] = current_messages
         new_data = data
         print(new_data)

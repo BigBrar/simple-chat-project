@@ -1,1 +1,16 @@
-[{"username": "sardarioo2", "chats": [{"username": "lovepreet", "messages": ["hello", "hi", "Is there anyone here", "yes there is !", "no there is not ", "no there is not "]}]}]
+[
+    {
+        "username": "sardarioo2",
+        "chats": [
+            {
+                "username": "sardarioo",
+                "messages": [
+                    {
+                        "sender": "sardarioo2",
+                        "message": "yes it is working"
+                    }
+                ]
+            }
+        ]
+    }
+]

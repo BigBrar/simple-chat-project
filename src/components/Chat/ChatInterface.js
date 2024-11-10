@@ -1,5 +1,5 @@
 import styles from './ChatInterface.module.css'
-import {useRef} from 'react'
+import {useRef, useState} from 'react'
 export default function ChatInterface(){
     const userInput = useRef();
     let authtoken = localStorage.getItem('authToken')
@@ -8,15 +8,17 @@ export default function ChatInterface(){
         {username:'lovepreet'},
         {username:'rakulpreet singh'}
     ]
+    const [currentChat, setCurrentChat] = useState(users[0]['username']);
 
-    function accessUserChat(){
+    function accessUserChat(buttonText){
+        setCurrentChat(buttonText)
         let socket = new WebSocket('ws://localhost:8865');
         socket.onmessage = function(event) {
             console.log('Message from server:', event.data);
             if (event.data == 'connected'){
                 console.log("connected to server")
 
-                socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':'lovepreet','authtoken':authtoken}))
+                socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
                 // socket.close()
             }
             else {
@@ -30,7 +32,7 @@ export default function ChatInterface(){
         let data = userInput.current.value
         let socket = new WebSocket('ws://localhost:8865');
         socket.onopen = function(){
-        socket.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken}))
+        socket.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken, 'receiver':currentChat}))
         socket.close()}
     }
     return(
@@ -40,7 +42,7 @@ export default function ChatInterface(){
                 <h2 className={styles.heading}>Heading</h2>
                 {users.map((user)=>(
                     <div className={styles.user}>
-                    <button onClick={accessUserChat} className={styles.userButton}>{user.username}</button>
+                    <button onClick={()=>accessUserChat(user.username)} className={styles.userButton}>{user.username}</button>
                     </div>
                 ))}
             </div>
