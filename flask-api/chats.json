@@ -1,16 +1,1 @@
-[
-    {
-        "username": "sardarioo2",
-        "chats": [
-            {
-                "username": "sardarioo",
-                "messages": [
-                    {
-                        "sender": "sardarioo2",
-                        "message": "yes it is working"
-                    }
-                ]
-            }
-        ]
-    }
-]
+[{"username": "sardarioo", "chats": [{"username":"lovepreet","messages":[]}]}]

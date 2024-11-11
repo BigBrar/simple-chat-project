@@ -29,9 +29,14 @@ def write_new_user(form):
     data.append(new_user)
     with open('users.json','w')as file:
         json.dump(data,file)
+    with open('chats.json','r')as file:
+        chats = json.load(file)
+    chats.append({"username": new_user['username'],"chats": []})
+    with open('chats.json','w')as file:
+        json.dump(chats,file)
     return {'status':200, 'result':'new account has been created' }
 
-def read_existing_user(form):
+def verify_login(form):
     data = read_file()
     for user in data:
         if user['username'] == form['username'] and user['password'] == form['password']:
@@ -49,13 +54,12 @@ def method_login():
     if request.method == 'GET':
         return 'wrong method my friend, WRONG METHOD !!'
     form = request.get_json()
-    response = read_existing_user(form)
-    return response
+    response = verify_login(form)
+    return response 
 
 @app.route('/signup',methods=['POST'])
 def post_method():
-    response  = request.get_json()
-    print('new user has been created')
+    response = write_new_user(request.get_json())
     return response
 
 if __name__ == '__main__':

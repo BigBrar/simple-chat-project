@@ -5,6 +5,16 @@ import websockets
 
 clients = []
 
+def get_username_with_authtoken(authtoken):
+    with open('users.json','r')as file:
+            data = json.load(file)
+    for user in data:
+        if user['authtoken'] == authtoken:
+            username = user['username']
+            return username
+    print({'status':404, 'result':'invalid authtoken'})
+    return {'status':404, 'result':'invalid authtoken'}
+
 
 async def add_clients(websocket):
     clients.append(websocket)
@@ -20,13 +30,9 @@ async def accept_connection(websocket,path):
     message = json.loads(message)
     if message['action'] == 'CHAT_EXTRACTION':
         chat_to_extract = message['chat_to_extract']
-        with open('users.json','r')as file:
-            data = json.load(file)
         authtoken = message['authtoken']
-        for user in data:
-            if user['authtoken'] == authtoken:
-                username = user['username']
-                print('your username is ',username)
+
+        username = get_username_with_authtoken(authtoken)
         
         with open('chats.json','r')as file:
             data = json.load(file)
@@ -52,14 +58,9 @@ async def accept_connection(websocket,path):
                 await websocket.send([])
                         
     elif message['action'] == 'MSG_SEND':
-        with open('users.json','r')as file:
-            data = json.load(file)
         authtoken = message['authtoken']
         receiver = message['receiver']
-        for user in data:
-            if user['authtoken'] == authtoken:
-                username = user['username']
-                print('your username is ',username)
+        username = get_username_with_authtoken(authtoken)
         
         with open('chats.json','r')as file:
             data = json.load(file)
@@ -86,6 +87,22 @@ async def accept_connection(websocket,path):
         print(new_data)
         with open('chats.json','w')as file:
             json.dump(new_data,file)
+    
+    elif message['action'] == 'GET_USER_CHATS':
+        authtoken = message['authtoken']
+        username = get_username_with_authtoken(authtoken)
+        with open('chats.json','r')as file:
+            data = json.load(file)
+
+        chat_users = []
+
+        for user in data:
+            if user['username'] == username:
+                for chat_user in user['chats']:
+                    chat_users.append(chat_user['username'])
+        print('chat users = ',chat_users)
+        await websocket.send(json.dumps({'status':200, 'chat_users':chat_users}))
+        
 
             
 async def start_server():

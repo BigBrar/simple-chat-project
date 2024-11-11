@@ -1,14 +1,32 @@
 import styles from './ChatInterface.module.css'
-import {useRef, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 export default function ChatInterface(){
-    const userInput = useRef();
     let authtoken = localStorage.getItem('authToken')
-    let users = [
-        {username:'sardarioo'},
-        {username:'lovepreet'},
-        {username:'rakulpreet singh'}
-    ]
-    const [currentChat, setCurrentChat] = useState(users[0]['username']);
+    const [users, setUsers] = useState([])
+    useEffect(()=>{
+    let socket = new WebSocket('ws://localhost:8865');
+    
+    socket.onmessage = function(event){
+        if(event.data == 'connected'){
+            console.log('connected to the server')
+        }
+        else{
+            console.log('message from the server - ',event.data)
+            console.log(JSON.parse(event.data))
+            let variable_test = JSON.parse(event.data)
+            setUsers(variable_test['chat_users'])
+            console.log('value of users is ',users)
+            
+        }
+    }
+    socket.onopen = function(){
+        socket.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
+    }
+    },[])
+    
+    
+    const userInput = useRef();
+    const [currentChat, setCurrentChat] = useState(users[0]);
 
     function accessUserChat(buttonText){
         setCurrentChat(buttonText)
@@ -19,6 +37,7 @@ export default function ChatInterface(){
                 console.log("connected to server")
 
                 socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
+                
                 // socket.close()
             }
             else {
@@ -40,9 +59,9 @@ export default function ChatInterface(){
         <div className={styles.mainContainer}>
             <div className={styles.chats}>
                 <h2 className={styles.heading}>Heading</h2>
-                {users.map((user)=>(
+                { users.map((user)=>(
                     <div className={styles.user}>
-                    <button onClick={()=>accessUserChat(user.username)} className={styles.userButton}>{user.username}</button>
+                    <button onClick={()=>accessUserChat(user)} className={styles.userButton}>{user}</button>
                     </div>
                 ))}
             </div>
