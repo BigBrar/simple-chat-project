@@ -1,3 +1,15 @@
+.search{
+    display: flex;
+    gap: 2rem;
+}
+
+.findUser{
+    padding: 6px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: black;
+}
+
 .mainContainer{
     background-color: rgb(219, 218, 218);
     display: grid;

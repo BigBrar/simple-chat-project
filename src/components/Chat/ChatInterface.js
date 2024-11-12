@@ -56,6 +56,10 @@ export default function ChatInterface(){
     }
     return(
         <>
+        <div className={styles.search}>
+            <h2>Find User</h2>
+            <input className={styles.findUser} placeholder='username'></input>
+        </div>
         <div className={styles.mainContainer}>
             <div className={styles.chats}>
                 <h2 className={styles.heading}>Heading</h2>
