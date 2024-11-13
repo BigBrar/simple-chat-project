@@ -1,1 +1,20 @@
-[{"username": "sardarioo", "password": "madara", "email": "test@email.com", "authtoken": "0.&j)6b$o7$xe1{\"BI6Fca4.6|7>K-eC"}, {"username": "lovepreet", "password": "lovepreet", "email": "lovepreet@email.com", "authtoken": "|.*>~dT\\}keoR^P/U(h([~$\"yVAN+wY%"}, {"username": "agniveer", "password": "agniveer", "email": "agniveer@email.com", "authtoken": ".Abih6Q~@Cp9XT^y'6H\\Tfa,mz*e!Y=q"}]
+[
+    {
+        "username": "sardarioo",
+        "password": "madara",
+        "email": "test@email.com",
+        "authtoken": "0.&j)6b$o7$xe1{\"BI6Fca4.6|7>K-eC"
+    },
+    {
+        "username": "lovepreet",
+        "password": "lovepreet",
+        "email": "lovepreet@email.com",
+        "authtoken": "|.*>~dT\\}keoR^P/U(h([~$\"yVAN+wY%"
+    },
+    {
+        "username": "agniveer",
+        "password": "agniveer",
+        "email": "agniveer@email.com",
+        "authtoken": ".Abih6Q~@Cp9XT^y'6H\\Tfa,mz*e!Y=q"
+    }
+]

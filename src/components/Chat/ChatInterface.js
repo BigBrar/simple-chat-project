@@ -2,7 +2,9 @@ import styles from './ChatInterface.module.css'
 import {useEffect, useRef, useState} from 'react'
 export default function ChatInterface(){
     let authtoken = localStorage.getItem('authToken')
+    let findUser = useRef()
     const [users, setUsers] = useState([])
+    const [chat, setChat] = useState(undefined)
     useEffect(()=>{
     let socket = new WebSocket('ws://localhost:8865');
     
@@ -40,8 +42,18 @@ export default function ChatInterface(){
                 
                 // socket.close()
             }
+            else if (JSON.parse(event.data).status == 200){
+                console.log('chat extracted')
+                const jsonObject = JSON.parse(event.data);
+
+                // Convert the chat property from a string to an array
+                setChat(JSON.parse(jsonObject.chat))
+                // setChat(JSON.parse(event.data)['chat'])
+                console.log(typeof(JSON.parse(jsonObject.chat)))
+            }
             else {
                 console.log('data received from server - ',event.data)
+                console.log(typeof(event.data))
                 socket.close()
             }
         }
@@ -54,11 +66,23 @@ export default function ChatInterface(){
         socket.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken, 'receiver':currentChat}))
         socket.close()}
     }
+
+    function addNewChat(){
+        let receiver = findUser.current.value
+        const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 'authtoken' : authtoken, 'username':receiver })
+    };
+    const response = fetch('http://localhost:5000/addcontact', requestOptions);
+    console.log(response.json)
+}
     return(
         <>
         <div className={styles.search}>
             <h2>Find User</h2>
-            <input className={styles.findUser} placeholder='username'></input>
+            <input ref={findUser} className={styles.findUser} placeholder='username'></input>
+            <button onClick={addNewChat}>Add</button>
         </div>
         <div className={styles.mainContainer}>
             <div className={styles.chats}>
@@ -76,6 +100,12 @@ export default function ChatInterface(){
             </div>
 
         </div>
+        {chat && chat.map((message)=>(
+             message.sent_by === 'sender' ? (
+                <div key={message.id}>You: {message.message}</div>
+            ) : <div key={message.id}>Receiver: {message.message}</div>
+             
+        ))}
         </>
     )
 }

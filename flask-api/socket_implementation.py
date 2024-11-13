@@ -42,7 +42,7 @@ async def accept_connection(websocket,path):
                 for chat_user in user['chats']:
                     if chat_user['username'] == chat_to_extract:
                         whole_chat_msg = json.dumps(chat_user['messages'])
-                        await websocket.send(whole_chat_msg)
+                        await websocket.send(json.dumps({'status':'200','result':'chat extracted','chat':whole_chat_msg}))
                         print('chat extracted - ',whole_chat_msg)
                         return 0
                 user['chats'].append({'username':chat_to_extract, 'messages':[]})
@@ -71,17 +71,18 @@ async def accept_connection(websocket,path):
                 for chat_user in user['chats']:
                     if chat_user['username'] == receiver:
                         current_messages = chat_user['messages']
-                        current_messages.append({'sender':username, 'message':message['msg_body']})
+                        current_messages.append({'sent_by':'sender', 'message':message['msg_body']})
                         chat_user['messages'] = current_messages
                     else:
                         pass
                         # print('no such chat user ',chat_user)
         for user in data:
+            print('receiver:',receiver)
             if user['username'] == receiver:
                 for chat_user in user['chats']:
                     if chat_user['username'] == username:
                         current_messages = chat_user['messages']
-                        current_messages.append({'receiver':username, 'message':message['msg_body']})
+                        current_messages.append({'sent_by':'receiver', 'message':message['msg_body']})
                         chat_user['messages'] = current_messages
         new_data = data
         print(new_data)
