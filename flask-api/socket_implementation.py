@@ -29,6 +29,7 @@ async def accept_connection(websocket,path):
     message = await websocket.recv()
     message = json.loads(message)
     if message['action'] == 'CHAT_EXTRACTION':
+        print('chat extraction ran.')
         chat_to_extract = message['chat_to_extract']
         authtoken = message['authtoken']
 
@@ -42,7 +43,7 @@ async def accept_connection(websocket,path):
                 for chat_user in user['chats']:
                     if chat_user['username'] == chat_to_extract:
                         whole_chat_msg = json.dumps(chat_user['messages'])
-                        await websocket.send(json.dumps({'status':'200','result':'chat extracted','chat':whole_chat_msg}))
+                        await websocket.send(json.dumps({'status':'200','result':'chat_extracted','chat':whole_chat_msg}))
                         print('chat extracted - ',whole_chat_msg)
                         return 0
                 user['chats'].append({'username':chat_to_extract, 'messages':[]})
@@ -58,6 +59,7 @@ async def accept_connection(websocket,path):
                 await websocket.send([])
                         
     elif message['action'] == 'MSG_SEND':
+        print('message send ran')
         authtoken = message['authtoken']
         receiver = message['receiver']
         username = get_username_with_authtoken(authtoken)
@@ -102,7 +104,7 @@ async def accept_connection(websocket,path):
                 for chat_user in user['chats']:
                     chat_users.append(chat_user['username'])
         print('chat users = ',chat_users)
-        await websocket.send(json.dumps({'status':200, 'chat_users':chat_users}))
+        await websocket.send(json.dumps({'status':200,'result':'retrieve_user_chats','chat_users':chat_users}))
         
 
             
