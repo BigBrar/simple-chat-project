@@ -1,5 +1,6 @@
 import styles from './ChatInterface.module.css'
 import {useEffect, useRef, useState} from 'react'
+import {io} from 'socket.io-client'
 export default function ChatInterface(){
     let authtoken = localStorage.getItem('authToken')
     let findUser = useRef()
@@ -7,15 +8,20 @@ export default function ChatInterface(){
     const [chat, setChat] = useState(undefined)
     const [ws, setws] = useState(null);
     useEffect(()=>{
-    let socket = new WebSocket('ws://localhost:8865');
+    let socket = new io('http://localhost:5000');
+
+    socket.on('connect', () => {
+        console.log('Connected to WebSocket server');
+        socket.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
+    });
     
-    socket.onmessage = function(event){
-        if(event.data == 'connected'){
+    socket.on('message', (data)=> {
+        if(data == 'connected'){
             console.log('connected to the server')
         }
-        else if (JSON.parse(event.data).result == 'chat_extracted'){
+        else if (JSON.parse(data).result == 'chat_extracted'){
             console.log('chat extracted')
-            const jsonObject = JSON.parse(event.data);
+            const jsonObject = JSON.parse(data);
 
             // Convert the chat property from a string to an array
             setChat(JSON.parse(jsonObject.chat))
@@ -28,17 +34,17 @@ export default function ChatInterface(){
         //     socket.close()
         // }
         else{
-            console.log('message from the server - ',event.data)
-            console.log(JSON.parse(event.data))
-            let variable_test = JSON.parse(event.data)
+            console.log('message from the server - ',data)
+            console.log(JSON.parse(data))
+            let variable_test = JSON.parse(data)
             setUsers(variable_test['chat_users'])
             console.log('value of users is ',users)
             
         }
-    }
-    socket.onopen = function(){
-        socket.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
-    }
+    })
+    // socket.onopen = function(){
+    //     socket.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
+    // }
 
     setws(socket);
 
