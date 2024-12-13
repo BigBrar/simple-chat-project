@@ -16,23 +16,28 @@ export default function ChatInterface(){
     });
     
     socket.on('message', (data)=> {
+        
         if(data == 'connected'){
             console.log('connected to the server')
         }
-        else if (JSON.parse(data).result == 'chat_extracted'){
+        else if (data.result == 'chat_extracted'){
             console.log('chat extracted')
-            const jsonObject = JSON.parse(data);
+            const jsonObject = data;
 
             // Convert the chat property from a string to an array
-            setChat(JSON.parse(jsonObject.chat))
+            setChat(jsonObject.chat)
+            console.log("Chat messages",jsonObject.chat)
             // setChat(JSON.parse(event.data)['chat'])
-            console.log(typeof(JSON.parse(jsonObject.chat)))
+            console.log(typeof(jsonObject.chat))
         }
         // else {
         //     console.log('data received from server - ',event.data)
         //     console.log(typeof(event.data))
         //     socket.close()
         // }
+        else if(data.result == 'ping_response'){
+            console.log("Ping response ...")
+        }
         else{
             console.log('message from the server - ',data)
             console.log(JSON.parse(data))
@@ -52,11 +57,25 @@ export default function ChatInterface(){
         socket.close();
     };
     },[])
+
+
+    useEffect(() => {
+        if (!ws) return
+    
+        const interval = setInterval(() => {
+          if (ws && ws.connected) {
+            ws.send(JSON.stringify({ action: 'PING', authtoken }))
+            console.log('Sent PING to server')
+          }
+        }, 5000) // Ping every 5 seconds
+    
+        // Cleanup interval on component unmount or when WebSocket changes
+        return () => clearInterval(interval)
+      }, [ws])
     
     
     const userInput = useRef();
     const [currentChat, setCurrentChat] = useState(users[0]);
-
     function accessUserChat(buttonText){
         setCurrentChat(buttonText)
         // let socket = new WebSocket('ws://localhost:8865');
@@ -96,6 +115,7 @@ export default function ChatInterface(){
         let data = userInput.current.value
         console.log('input data - ',data)
         ws.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken, 'receiver':currentChat}))
+        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
     }
 
     function addNewChat(){

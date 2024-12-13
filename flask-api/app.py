@@ -45,21 +45,37 @@ def extract_chat(user_id, contact_username):
             print(f"Contact user {contact_username} not found.")
             return {'status': 404, 'result': 'Contact user not found'}
 
-        # Retrieve all chats between the logged-in user and the contact
-        chats = db.session.query(Chat).filter(
+        # Retrieve the chat between the logged-in user and the contact
+        chat = db.session.query(Chat).filter(
             ((Chat.user1_id == user_id) & (Chat.user2_id == contact_user.id)) |
             ((Chat.user1_id == contact_user.id) & (Chat.user2_id == user_id))
-        ).order_by(Chat.timestamp.asc()).all()
+        ).first()
 
-        # Convert chats to JSON-friendly format
-        messages = [{'sender': chat.user1_id, 'receiver': chat.user2_id, 'message': chat.messages, 'timestamp': chat.timestamp} for chat in chats]
+        if not chat:
+            print(f"No chat found between user {user_id} and contact {contact_user.id}.")
+            return {'status': 404, 'result': 'Chat not found'}
+
+        # Retrieve all messages for the found chat
+        messages = db.session.query(Message).filter_by(chat_id=chat.id).order_by(Message.timestamp.asc()).all()
+
+        # Convert messages to a JSON-friendly format
+        formatted_messages = [
+            {
+                'id': message.id,
+                'sent_by': message.sent_by,
+                'message': message.message,
+                'timestamp': message.timestamp.isoformat()
+            }
+            for message in messages
+        ]
 
         # Return the extracted chat messages
-        return {'status': 200, 'result': 'chat_extracted', 'chat': messages}
+        return {'status': 200, 'result': 'chat_extracted', 'chat': formatted_messages}
 
     except Exception as e:
         print(f"Error extracting chat: {e}")
         return {'status': 500, 'result': 'Internal Server Error'}
+
 
 def get_username_with_authtoken(authtoken):
     try:
@@ -222,6 +238,66 @@ def handle_message(data):
         # Extract chat messages
         response = extract_chat(user.id, chat_to_extract)
         emit('message', response)
+    
+    if data['action'] == 'MSG_SEND':
+        print('Message sending initiated.')
+
+        # Extract details from the received object
+        msg_body = data.get('msg_body')
+        authtoken = data.get('authtoken')
+        receiver_username = data.get('receiver')
+
+        # Check for missing fields
+        if not msg_body or not authtoken or not receiver_username:
+            emit('error', {'status': 400, 'result': 'Invalid message format'})
+            return
+
+        try:
+            # Verify the sender's auth token and get their username
+            sender_username = get_username_with_authtoken(authtoken)
+            if isinstance(sender_username, dict) and sender_username.get('status') == 404:
+                emit('error', sender_username)
+                return
+
+            # Retrieve the sender and receiver user objects
+            sender = db.session.query(User).filter_by(username=sender_username).first()
+            receiver = db.session.query(User).filter_by(username=receiver_username).first()
+
+            if not sender or not receiver:
+                emit('error', {'status': 404, 'result': 'Sender or receiver not found'})
+                return
+
+            # Retrieve or create a chat between sender and receiver
+            chat = db.session.query(Chat).filter(
+                ((Chat.user1_id == sender.id) & (Chat.user2_id == receiver.id)) |
+                ((Chat.user1_id == receiver.id) & (Chat.user2_id == sender.id))
+            ).first()
+
+            if not chat:
+                # If no existing chat, create a new one
+                chat = Chat(user1_id=sender.id, user2_id=receiver.id)
+                db.session.add(chat)
+                db.session.commit()
+                print('New chat created.')
+
+            # Add the message to the Messages table
+            new_message = Message(chat_id=chat.id, sent_by=sender.id, message=msg_body)
+            db.session.add(new_message)
+            db.session.commit()
+
+            print(f"Message sent by {sender_username} to {receiver_username}: {msg_body}")
+
+            # Emit a success response to the sender
+            emit('success', {'status': 200, 'result': 'Message sent successfully'})
+
+        except Exception as e:
+            print(f"Error sending message: {e}")
+            emit('error', {'status': 500, 'result': 'Internal Server Error'})
+
+    elif data['action'] == 'PING':
+        print("PING RECEIVED!!")
+        emit('message',{'result':'ping_response'})
+
     else:
         print('received message')
         print(data)
