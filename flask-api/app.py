@@ -148,6 +148,39 @@ def verify_login(form):
         return {'status': 200, 'result': 'login success', 'authtoken': user.auth_token}
     return {'status': 404, 'result': 'invalid username or password'}
 
+
+
+def get_chat_length(user1_username, user2_username):
+    """
+    Get the total number of messages in the chat between two users.
+    """
+    try:
+        # Retrieve the user objects for both users
+        user1 = db.session.query(User).filter_by(username=user1_username).first()
+        user2 = db.session.query(User).filter_by(username=user2_username).first()
+
+        if not user1 or not user2:
+            return {'status': 404, 'message': 'One or both users not found'}
+
+        # Find the chat between the two users
+        chat = db.session.query(Chat).filter(
+            ((Chat.user1_id == user1.id) & (Chat.user2_id == user2.id)) |
+            ((Chat.user1_id == user2.id) & (Chat.user2_id == user1.id))
+        ).first()
+
+        if not chat:
+            return {'status': 200, 'message_count': 0}  # No chat means no messages
+
+        # Count the total number of messages in the chat
+        message_count = db.session.query(Message).filter_by(chat_id=chat.id).count()
+
+        return {'status': 200, 'message_count': message_count}
+
+    except Exception as e:
+        print(f"Error retrieving chat length: {e}")
+        return {'status': 500, 'message': 'Internal Server Error'}
+
+
 def addcontact(receiver_username, sender_authtoken):
     sender = User.query.filter_by(auth_token=sender_authtoken).first()
     receiver = User.query.filter_by(username=receiver_username).first()
@@ -237,6 +270,7 @@ def handle_message(data):
 
         # Extract chat messages
         response = extract_chat(user.id, chat_to_extract)
+        print('send back the chat messages...')
         emit('message', response)
     
     if data['action'] == 'MSG_SEND':
@@ -296,7 +330,8 @@ def handle_message(data):
 
     elif data['action'] == 'PING':
         print("PING RECEIVED!!")
-        emit('message',{'result':'ping_response'})
+        output = get_chat_length(get_username_with_authtoken(data['user1']),data['user2'])
+        emit('message',{'result':'ping_response','message_count':output['message_count']})
 
     else:
         print('received message')

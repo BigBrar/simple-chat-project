@@ -37,6 +37,14 @@ export default function ChatInterface(){
         // }
         else if(data.result == 'ping_response'){
             console.log("Ping response ...")
+            console.log(data)
+            console.log('totalmessages ',totalMessages)
+            console.log('messages count', data.message_count)
+            if (totalMessages != data.message_count){
+                console.log('if ran ')
+                setTotalMessages(data.message_count)
+                socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+            }
         }
         else{
             console.log('message from the server - ',data)
@@ -58,13 +66,13 @@ export default function ChatInterface(){
     };
     },[])
 
-
+    //pinging the server for chat updates
     useEffect(() => {
         if (!ws) return
-    
+        // console.log('sending ping')
         const interval = setInterval(() => {
-          if (ws && ws.connected) {
-            ws.send(JSON.stringify({ action: 'PING', authtoken }))
+          if (ws && ws.connected && currentChat) {
+            ws.send(JSON.stringify({action:'PING',user1:authtoken, user2: currentChat}))
             console.log('Sent PING to server')
           }
         }, 5000) // Ping every 5 seconds
@@ -76,15 +84,17 @@ export default function ChatInterface(){
     
     const userInput = useRef();
     const [currentChat, setCurrentChat] = useState(users[0]);
+    const [totalMessages, setTotalMessages] = useState(0);
     function accessUserChat(buttonText){
         setCurrentChat(buttonText)
         // let socket = new WebSocket('ws://localhost:8865');
         if (ws){
             let socket = ws;
             console.log("socket is ws")
-            console.log(socket)
+            // console.log(socket)
             // socket.send('hello')
             socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
+            console.log('socket send ...')
         // socket.onmessage = function(event) {
         //     console.log('Message from server:', event.data);
         //     if (event.data == 'connected'){
