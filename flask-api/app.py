@@ -273,7 +273,7 @@ def handle_message(data):
         print('send back the chat messages...')
         emit('message', response)
     
-    if data['action'] == 'MSG_SEND':
+    elif data['action'] == 'MSG_SEND':
         print('Message sending initiated.')
 
         # Extract details from the received object
@@ -332,6 +332,54 @@ def handle_message(data):
         print("PING RECEIVED!!")
         output = get_chat_length(get_username_with_authtoken(data['user1']),data['user2'])
         emit('message',{'result':'ping_response','message_count':output['message_count']})
+
+    elif data['action'] == 'CLEAR_CHAT':
+        print('Clear chat action initiated.')
+
+        # Extract input details
+        authtoken = data['authtoken']
+        receiver_username = data['receiver']
+
+        # Validate inputs
+        if not authtoken or not receiver_username:
+            emit('error', {'status': 400, 'result': 'Invalid input data'})
+            return
+
+        try:
+            # Verify the sender's auth token and get their username
+            sender_username = get_username_with_authtoken(authtoken)
+            if isinstance(sender_username, dict) and sender_username.get('status') == 404:
+                emit('error', sender_username)
+                return
+
+            # Retrieve sender and receiver user objects
+            sender = db.session.query(User).filter_by(username=sender_username).first()
+            receiver = db.session.query(User).filter_by(username=receiver_username).first()
+
+            if not sender or not receiver:
+                emit('error', {'status': 404, 'result': 'Sender or receiver not found'})
+                return
+
+            # Fetch the chat between sender and receiver
+            chat = db.session.query(Chat).filter(
+                ((Chat.user1_id == sender.id) & (Chat.user2_id == receiver.id)) |
+                ((Chat.user1_id == receiver.id) & (Chat.user2_id == sender.id))
+            ).first()
+
+            if not chat:
+                emit('error', {'status': 404, 'result': 'No chat found between the users'})
+                return
+
+            # Clear all messages associated with the chat
+            db.session.query(Message).filter_by(chat_id=chat.id).delete()
+            db.session.commit()
+
+            print(f"Chat cleared between {sender_username} and {receiver_username}.")
+            emit('success', {'status': 200, 'result': 'Chat cleared successfully'})
+
+        except Exception as e:
+            print(f"Error clearing chat: {e}")
+            emit('error', {'status': 500, 'result': 'Internal Server Error'})
 
     else:
         print('received message')

@@ -6,6 +6,7 @@ export default function ChatInterface(){
     let findUser = useRef()
     const [users, setUsers] = useState([])
     const [chat, setChat] = useState(undefined)
+    const [currentChat, setCurrentChat] = useState(users[0]);
     const [ws, setws] = useState(null);
     useEffect(()=>{
     let socket = new io('http://localhost:5000');
@@ -36,13 +37,14 @@ export default function ChatInterface(){
         //     socket.close()
         // }
         else if(data.result == 'ping_response'){
-            console.log("Ping response ...")
+            console.log("Ping response ....")
             console.log(data)
-            console.log('totalmessages ',totalMessages)
+            console.log('totalmessages ',totalMessages.current)
             console.log('messages count', data.message_count)
-            if (totalMessages != data.message_count){
+            if (totalMessages.current != data.message_count){
                 console.log('if ran ')
-                setTotalMessages(data.message_count)
+                totalMessages.current = data.message_count
+                console.log('updated total messages', totalMessages.current)
                 socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
             }
         }
@@ -68,25 +70,25 @@ export default function ChatInterface(){
 
     //pinging the server for chat updates
     useEffect(() => {
+        console.log('secodn useEffect ran...')
         if (!ws) return
-        // console.log('sending ping')
+        console.log('sending ping')
         const interval = setInterval(() => {
           if (ws && ws.connected && currentChat) {
             ws.send(JSON.stringify({action:'PING',user1:authtoken, user2: currentChat}))
             console.log('Sent PING to server')
           }
-        }, 5000) // Ping every 5 seconds
+        }, 500) // Ping every 5 seconds
     
         // Cleanup interval on component unmount or when WebSocket changes
         return () => clearInterval(interval)
-      }, [ws])
+      }, [ws, currentChat, authtoken])
     
     
     const userInput = useRef();
-    const [currentChat, setCurrentChat] = useState(users[0]);
-    const [totalMessages, setTotalMessages] = useState(0);
+    const totalMessages = useRef();
     function accessUserChat(buttonText){
-        setCurrentChat(buttonText)
+        // setCurrentChat(buttonText)
         // let socket = new WebSocket('ws://localhost:8865');
         if (ws){
             let socket = ws;
@@ -95,36 +97,23 @@ export default function ChatInterface(){
             // socket.send('hello')
             socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
             console.log('socket send ...')
-        // socket.onmessage = function(event) {
-        //     console.log('Message from server:', event.data);
-        //     if (event.data == 'connected'){
-        //         console.log("connected to server")
-
-        //         socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
-                
-        //         // socket.close()
-        //     }
-            // else if (JSON.parse(event.data).status == 200){
-            //     console.log('chat extracted')
-            //     const jsonObject = JSON.parse(event.data);
-
-            //     // Convert the chat property from a string to an array
-            //     setChat(JSON.parse(jsonObject.chat))
-            //     // setChat(JSON.parse(event.data)['chat'])
-            //     console.log(typeof(JSON.parse(jsonObject.chat)))
-            // }
-            // else {
-            //     console.log('data received from server - ',event.data)
-            //     console.log(typeof(event.data))
-            //     socket.close()
-            // }
-        // }
+            setCurrentChat(buttonText)
+        
     }
 }
     function sendData(){
         let data = userInput.current.value
-        console.log('input data - ',data)
+        userInput.current.value = '';
         ws.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken, 'receiver':currentChat}))
+        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+    }
+
+    function clearChat(){
+        ws.send(JSON.stringify({'action':'CLEAR_CHAT','authtoken':authtoken, 'receiver':currentChat}))
+        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
         ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
     }
 
@@ -157,16 +146,20 @@ export default function ChatInterface(){
             <div>
                 <h1>INPUT FIELD </h1>
                 <input ref={userInput} type='text'/>
-                <button onClick={sendData}>SEND</button>
-            </div>
-
-        </div>
-        {chat && chat.map((message)=>(
-             message.sent_by === 'sender' ? (
+                <button onClick={sendData}>SEND</button><br/>
+                <button onClick={clearChat}>CLEAR CHAT ALL</button>
+                <div style={{height:'300px', overflowY:'auto'}}>
+                {chat && chat.map((message)=>(
+             message.sent_by === 1 ? (
                 <div key={message.id}>You: {message.message}</div>
             ) : <div key={message.id}>Receiver: {message.message}</div>
              
         ))}
+                </div>
+            </div>
+                
+        </div>
+        
         </>
     )
 }
