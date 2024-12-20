@@ -45,6 +45,7 @@ export default function ChatInterface(){
                 console.log('if ran ')
                 totalMessages.current = data.message_count
                 console.log('updated total messages', totalMessages.current)
+                console.log("sending chat EXTRACTION")
                 socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
             }
         }
@@ -78,7 +79,7 @@ export default function ChatInterface(){
             ws.send(JSON.stringify({action:'PING',user1:authtoken, user2: currentChat}))
             console.log('Sent PING to server')
           }
-        }, 500) // Ping every 5 seconds
+        }, 1000) // Ping every 5 seconds
     
         // Cleanup interval on component unmount or when WebSocket changes
         return () => clearInterval(interval)
