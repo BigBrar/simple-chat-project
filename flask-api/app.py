@@ -62,7 +62,7 @@ def extract_chat(user_id, contact_username):
         formatted_messages = [
             {
                 'id': message.id,
-                'sent_by': message.sent_by,
+                'sent_by': db.session.query(User).filter_by(id=message.sent_by).first().username,
                 'message': message.message,
                 'timestamp': message.timestamp.isoformat()
             }
@@ -140,7 +140,7 @@ def write_new_user(form):
     )
     db.session.add(new_user)
     db.session.commit()
-    return {'status': 200, 'result': 'new account has been created'}
+    return {'status': 200, 'result': 'account_created'}
 
 def verify_login(form):
     user = User.query.filter_by(username=form['username'], password=form['password']).first()

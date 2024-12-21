@@ -42,3 +42,8 @@
 .userButton{
     padding: 2rem;
 }
+
+.selectedChat{
+    display: grid;
+    
+}

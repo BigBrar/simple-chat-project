@@ -149,11 +149,25 @@ export default function ChatInterface(){
                 <input ref={userInput} type='text'/>
                 <button onClick={sendData}>SEND</button><br/>
                 <button onClick={clearChat}>CLEAR CHAT ALL</button>
-                <div style={{height:'300px', overflowY:'auto'}}>
+                <div className={styles.selectedChat} style={{height:'300px', overflowY:'auto'}}>
                 {chat && chat.map((message)=>(
-             message.sent_by === 1 ? (
-                <div key={message.id}>You: {message.message}</div>
-            ) : <div key={message.id}>Receiver: {message.message}</div>
+                    <div
+                    key={message.id}
+                    style={{
+                        textAlign: message.sent_by === currentChat ? 'left' : 'right',
+                        margin: '5px 0',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        backgroundColor: message.sent_by === currentChat ? '#f1f1f1' : '#d1e7ff',
+                        display: 'inline-block',
+                        maxWidth: '70%'
+                    }}
+                >                                           
+                    {`${message.message}`}
+                </div>
+            //  message.sent_by === currentChat ? (
+            //     <div key={message.id}>Receiver: {message.message}</div>
+            // ) : <div key={message.id}>Sender: {message.message}</div>
              
         ))}
                 </div>
