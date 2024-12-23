@@ -144,11 +144,20 @@ export default function ChatInterface(){
                     </div>
                 ))}
             </div>
-            <div>
+            <div >
+                { currentChat &&
+                <>
                 <h1>INPUT FIELD </h1>
                 <input ref={userInput} type='text'/>
                 <button onClick={sendData}>SEND</button><br/>
                 <button onClick={clearChat}>CLEAR CHAT ALL</button>
+                </>
+                }
+                {!currentChat && 
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '1.6rem' }}>
+                    <h2>Select a chat to view messages</h2>
+                </div>
+                }
                 <div className={styles.selectedChat} style={{height:'300px', overflowY:'auto'}}>
                 {chat && chat.map((message)=>(
                     <div
