@@ -1,0 +1,15 @@
+.AddButton{
+    border-style: solid;
+    border-color: black;
+    padding: 0.4rem;
+    background-color: rgb(102, 102, 102);
+    border-radius: 5px;
+    color: white;
+    transition: color 0.5s, background-color 0.5s;
+    /* borderStyle:'solid',borderColor:'black',padding:'0.4rem',backgroundColor:'grey',borderRadius:'5px',color:'white'} */
+}
+
+.AddButton:hover{
+    background-color: black;
+    color: white;
+}

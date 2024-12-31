@@ -1,6 +1,10 @@
-import styles from './ChatInterface.module.css'
-import {useEffect, useRef, useState} from 'react'
-import {io} from 'socket.io-client'
+import styles from './ChatInterface.module.css';
+import {useEffect, useRef, useState} from 'react';
+import {io} from 'socket.io-client';
+import ChatHeader from '../chat_components/ChatHeader.js'
+import AllChats from '../chat_components/AllChats.js';
+import CurrentChat from '../chat_components/CurrentChat.js';
+
 export default function ChatInterface(){
     let authtoken = localStorage.getItem('authToken')
     let findUser = useRef()
@@ -130,57 +134,13 @@ export default function ChatInterface(){
 }
     return(
         <>
-        <div className={styles.search}>
-            <h2>Find User</h2>
-            <input ref={findUser} className={styles.findUser} placeholder='username'></input>
-            <button onClick={addNewChat}>Add</button>
-        </div>
+        <ChatHeader styles={styles} findUser={findUser} addNewChat={addNewChat} />
+        
         <div className={styles.mainContainer}>
-            <div className={styles.chats}>
-                <h2 className={styles.heading}>Heading</h2>
-                { users.map((user)=>(
-                    <div className={styles.user}>
-                    <button onClick={()=>accessUserChat(user)} className={styles.userButton}>{user}</button>
-                    </div>
-                ))}
-            </div>
-            <div >
-                { currentChat &&
-                <>
-                <h1>INPUT FIELD </h1>
-                <input ref={userInput} type='text'/>
-                <button onClick={sendData}>SEND</button><br/>
-                <button onClick={clearChat}>CLEAR CHAT ALL</button>
-                </>
-                }
-                {!currentChat && 
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '1.6rem' }}>
-                    <h2>Select a chat to view messages</h2>
-                </div>
-                }
-                <div className={styles.selectedChat} style={{height:'300px', overflowY:'auto'}}>
-                {chat && chat.map((message)=>(
-                    <div
-                    key={message.id}
-                    style={{
-                        textAlign: message.sent_by === currentChat ? 'left' : 'right',
-                        margin: '5px 0',
-                        padding: '10px',
-                        borderRadius: '8px',
-                        backgroundColor: message.sent_by === currentChat ? '#f1f1f1' : '#d1e7ff',
-                        display: 'inline-block',
-                        maxWidth: '70%'
-                    }}
-                >                                           
-                    {`${message.message}`}
-                </div>
-            //  message.sent_by === currentChat ? (
-            //     <div key={message.id}>Receiver: {message.message}</div>
-            // ) : <div key={message.id}>Sender: {message.message}</div>
-             
-        ))}
-                </div>
-            </div>
+
+            <AllChats styles={styles} users={users} accessUserChat={accessUserChat}/>
+
+            <CurrentChat currentChat={currentChat} userInput={userInput} sendData={sendData} clearChat={clearChat} styles={styles} chat={chat} />
                 
         </div>
         
