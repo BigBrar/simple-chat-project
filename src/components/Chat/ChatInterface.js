@@ -8,6 +8,7 @@ import CurrentChat from '../chat_components/CurrentChat.js';
 export default function ChatInterface(){
     let authtoken = localStorage.getItem('authToken')
     let findUser = useRef()
+    const awaitResponse = useRef();
     const [users, setUsers] = useState([])
     const [chat, setChat] = useState(undefined)
     const [currentChat, setCurrentChat] = useState(users[0]);
@@ -27,6 +28,7 @@ export default function ChatInterface(){
         }
         else if (data.result == 'chat_extracted'){
             console.log('chat extracted')
+            awaitResponse.current = false;
             const jsonObject = data;
 
             // Convert the chat property from a string to an array
@@ -49,6 +51,7 @@ export default function ChatInterface(){
                 console.log('if ran ')
                 totalMessages.current = data.message_count
                 console.log('updated total messages', totalMessages.current)
+                awaitResponse.current = true;
                 console.log("sending chat EXTRACTION")
                 socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
             }
@@ -79,9 +82,12 @@ export default function ChatInterface(){
         if (!ws) return
         console.log('sending ping')
         const interval = setInterval(() => {
-          if (ws && ws.connected && currentChat) {
+          if (ws && ws.connected && currentChat && !awaitResponse.current) {
             ws.send(JSON.stringify({action:'PING',user1:authtoken, user2: currentChat}))
             console.log('Sent PING to server')
+          }
+          else if (awaitResponse.current){
+            ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
           }
         }, 1000) // Ping every 5 seconds
     
