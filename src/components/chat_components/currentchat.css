@@ -1,0 +1,84 @@
+.current-chat {
+    display: flex;
+    flex-direction: column;
+    height: 93vh;
+    width: 100%; 
+    max-width: 800px; /* Adjust as needed */
+    margin: 0 auto; /* Center the chat container horizontally */
+    overflow-y: auto;
+  }
+  
+  .no-chat-selected {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.6rem;
+  }
+  
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .chat-messages {
+    flex: 1;
+    padding: 10px;
+  }
+  
+  .chat-message {
+    display: flex;
+    align-items: center;
+    margin: 0px 0;
+    padding: 5px;
+    border-radius: 8px;
+    max-width: 900px; /* Set max-width for messages */
+  }
+  
+  .sent {
+    /* background-color: #d1e7ff; */
+    justify-content: flex-end;
+    /* max-width: 80%; */
+  }
+  
+  .received {
+    /* background-color: #f1f1f1; */
+    justify-content: flex-start;
+  }
+  
+  .chat-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    position: relative;
+    gap: 3rem;
+    justify-content: space-around;
+
+  }
+
+  .send-input{
+    padding: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    text-align: center;
+    width: 40vh;
+    /* NEED TO MAKE WIDTH responsive   for smaller screens*/
+  }
+
+  .eraserImage{
+    width: 5vh;
+  }
+
+  .clearChatMenu{
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    left: 0px;
+    top: -35px;
+    border-radius: 4px;
+    background-color: grey;
+    color: white;
+    padding: 6px;
+    opacity: 0.7;
+  }

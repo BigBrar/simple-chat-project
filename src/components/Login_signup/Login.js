@@ -1,9 +1,12 @@
 import { useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+// import { Navigate } from 'react-router-dom';
 import styles from './Login.module.css';
 
 export default function Login(){
   const username = useRef();
   const password = useRef();
+  const navigate = useNavigate();
 
   const sendDataToFlask = async(e, credentials)=>{
     e.preventDefault();
@@ -22,25 +25,30 @@ export default function Login(){
         console.log('something went wrong with the request, here is the server response')
         console.log(data.result)
     }
-    if (data.authtoken){
-        console.log("Authtoken = ", data['authtoken']);
-        localStorage.setItem('authToken',data['authtoken']);
-        window.location.href = window.location.href;}
+    if (data.auth_token){
+        console.log("Authtoken = ", data['auth_token']);
+        localStorage.setItem('authToken',data['auth_token']);
+        navigate('/')
+      }
 
 } catch (error) {
     console.error("Error occurred:", error);
 }
   }
   return (
+    <>
     <div className={styles.mainContainer}>
       
-        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/login',username:username.current.value, password:password.current.value, email:'none'})} className={styles.loginForm}>
+        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/auth/login',username:username.current.value, password:password.current.value, email:'none'})} className={styles.loginForm}>
           <h1 style={{fontSize:'1.5rem'}}>Login</h1>
           <input ref={username} className={styles.textInput} type='text' placeholder='Username'/>
           <input ref={password} className={styles.textInput} type='password' placeholder='Password'/>
           <input type='submit' className={styles.submitButton} />
+        <Link to='/signup' style={{textDecoration:'none', color:'white', fontSize:'1rem', marginTop:'1rem'}}>Don't have an Account? <span style={{color:'cyan'}}>Sign up here!!!</span></Link>
         </form>
       
     </div>
+
+    </>
   )
 }

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import styles from './Login.module.css';
+import {Link} from 'react-router-dom';
 
 export default function Login(){
   const username = useRef();
@@ -38,12 +39,13 @@ export default function Login(){
   return (
     <div className={styles.mainContainer}>
       
-        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/signup',username:username.current.value, password:password.current.value, email:email.current.value})} className={styles.loginForm}>
+        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/auth/signup',username:username.current.value, password:password.current.value, email:email.current.value})} className={styles.loginForm}>
           <h1 style={{fontSize:'1.5rem'}}>Sign Up</h1>
           <input ref={username} className={styles.textInput} type='text' placeholder='Username'/>
           <input ref={email} className={styles.textInput} type='email' placeholder='Email'/>
           <input ref={password} className={styles.textInput} type='password' placeholder='Password'/>
           <input type='submit' className={styles.submitButton} />
+          <Link to='/login' style={{textDecoration:'none', color:'white', fontSize:'1rem', marginTop:'1rem'}}>Already have an account?<span style={{color:'cyan'}}>Login here!!!</span></Link>
         </form>
       
     </div>

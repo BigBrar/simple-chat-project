@@ -1,7 +1,7 @@
 import styles from './ChatInterface.module.css';
 import {useEffect, useRef, useState} from 'react';
 import {io} from 'socket.io-client';
-import ChatHeader from '../chat_components/ChatHeader.js'
+import ChatHeader from '../chat_components/ChatHeader.js';
 import AllChats from '../chat_components/AllChats.js';
 import CurrentChat from '../chat_components/CurrentChat.js';
 
@@ -112,7 +112,8 @@ export default function ChatInterface(){
         
     }
 }
-    function sendData(){
+    function sendData(e){
+        e.preventDefault();
         let data = userInput.current.value
         userInput.current.value = '';
         ws.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken, 'receiver':currentChat}))
@@ -135,7 +136,7 @@ export default function ChatInterface(){
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 'authtoken' : authtoken, 'username':receiver })
     };
-    const response = fetch('http://localhost:5000/addcontact', requestOptions);
+    const response = fetch('http://localhost:5000/chat/addcontact', requestOptions);
     console.log(response.json)
 }
     return(

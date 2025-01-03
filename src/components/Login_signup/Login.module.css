@@ -28,3 +28,17 @@
     background-color: rgb(75, 72, 72);
     height: 2rem;
 }
+
+.signupLink {
+    text-align: center;
+    margin-top: 20px; 
+  }
+
+.signupContainer{
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: white;
+}
