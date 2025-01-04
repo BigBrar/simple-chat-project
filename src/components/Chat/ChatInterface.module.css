@@ -11,7 +11,7 @@
 }
 
 .mainContainer{
-    background-color: rgb(219, 218, 218);
+    /* background-color: rgb(219, 218, 218); */
     display: grid;
     grid-template-columns: 1fr 2.5fr;
     /* height: 100%; */

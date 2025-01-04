@@ -21,6 +21,11 @@
     border-radius: 5px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: white;
+    border-style: solid;
+    border-color: black;
+    /* max-width: 20rem; */
+    /* height: 4.7 rem; */
+    border-width: 1px;
     /* background-color: rgb(0, 0, 0); */
     background-color: rgb(42, 35, 35);
     cursor: pointer;

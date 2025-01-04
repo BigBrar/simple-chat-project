@@ -145,7 +145,7 @@ export default function ChatInterface(){
         
         <div className={styles.mainContainer}>
 
-            <AllChats styles={styles} users={users} accessUserChat={accessUserChat}/>
+            <AllChats styles={styles} users={users} accessUserChat={accessUserChat} currentChat={currentChat}/>
 
             <CurrentChat currentChat={currentChat} userInput={userInput} sendData={sendData} clearChat={clearChat} styles={styles} chat={chat} />
                 
