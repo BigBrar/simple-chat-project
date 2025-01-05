@@ -9,7 +9,7 @@ def setup_socketio_events(socketio):
     @socketio.on('connect')
     def handle_connect():
         print('Client connected')
-        emit('message', 'connected')
+        emit('message', {'status': '200', 'result': 'connected'})
 
     @socketio.on('message')
     def handle_message(data):
@@ -30,7 +30,7 @@ def setup_socketio_events(socketio):
             # Get the list of chat users
             chat_users_response = get_chat_users(username)
             print(f'chat_users_response = {chat_users_response}')
-            emit('message', json.dumps(chat_users_response))
+            emit('message', chat_users_response)
         elif data['action'] == 'CHAT_EXTRACTION':
             print('Chat extraction ran.')
 
@@ -170,4 +170,4 @@ def setup_socketio_events(socketio):
         else:
             print('received message')
             print(data)
-            emit('message', 'connected')
+            emit('message', json.dumps({'status': '200', 'result': 'connected'}))

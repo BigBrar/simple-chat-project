@@ -14,16 +14,19 @@ export default function ChatInterface(){
     const [currentChat, setCurrentChat] = useState(users[0]);
     const [ws, setws] = useState(null);
     useEffect(()=>{
+    //starting the initial connection that will be maintained throughout the session.
     let socket = new io('http://localhost:5000');
-
+    
     socket.on('connect', () => {
         console.log('Connected to WebSocket server');
         socket.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
     });
     
+    //this maintains all the websocket responses from the server.
     socket.on('message', (data)=> {
-        
-        if(data == 'connected'){
+        console.log('message received from the server - ',data)
+        console.log("type of data = ",typeof(data))
+        if(data.result == 'connected'){
             console.log('connected to the server')
         }
         else if (data.result == 'chat_extracted'){
@@ -31,17 +34,11 @@ export default function ChatInterface(){
             awaitResponse.current = false;
             const jsonObject = data;
 
-            // Convert the chat property from a string to an array
             setChat(jsonObject.chat)
             console.log("Chat messages",jsonObject.chat)
-            // setChat(JSON.parse(event.data)['chat'])
             console.log(typeof(jsonObject.chat))
         }
-        // else {
-        //     console.log('data received from server - ',event.data)
-        //     console.log(typeof(event.data))
-        //     socket.close()
-        // }
+        
         else if(data.result == 'ping_response'){
             console.log("Ping response ....")
             console.log(data)
@@ -56,19 +53,18 @@ export default function ChatInterface(){
                 socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
             }
         }
-        else{
+        else if(data.result == 'retrieve_user_chats'){
             console.log('message from the server - ',data)
-            console.log(JSON.parse(data))
-            let variable_test = JSON.parse(data)
-            setUsers(variable_test['chat_users'])
+            setUsers(data.chat_users)
             console.log('value of users is ',users)
             
         }
+        else{
+            console.log('message from the server - ',data)
+            console.log(typeof(data))
+        }
     })
-    // socket.onopen = function(){
-    //     socket.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
-    // }
-
+    //setting so that websocket can be accessed globally outside useEffect
     setws(socket);
 
     return () => {
@@ -89,7 +85,7 @@ export default function ChatInterface(){
           else if (awaitResponse.current){
             ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
           }
-        }, 1000) // Ping every 5 seconds
+        }, 1000) // Ping every 1 seconds
     
         // Cleanup interval on component unmount or when WebSocket changes
         return () => clearInterval(interval)
@@ -98,10 +94,9 @@ export default function ChatInterface(){
     
     const userInput = useRef();
     const totalMessages = useRef();
+    //fetches userChat whenever user clicks on a certain chat
     function accessUserChat(buttonText){
-        // setCurrentChat(buttonText)
-        // let socket = new WebSocket('ws://localhost:8865');
-        if (ws){
+        if (ws && buttonText != currentChat){
             let socket = ws;
             console.log("socket is ws")
             // console.log(socket)
@@ -109,26 +104,28 @@ export default function ChatInterface(){
             socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
             console.log('socket send ...')
             setCurrentChat(buttonText)
+            totalMessages.current = 0;
         
     }
+    else if (buttonText == currentChat){
+        //chat is already open so nothing happens
+        return 
+    }
 }
+    //sends the message to the receiver and extracts whole chat after sending
     function sendData(e){
         e.preventDefault();
         let data = userInput.current.value
         userInput.current.value = '';
         ws.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken, 'receiver':currentChat}))
         ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
-        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
-        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
     }
-
+    //clears the whole chat on the server.
     function clearChat(){
         ws.send(JSON.stringify({'action':'CLEAR_CHAT','authtoken':authtoken, 'receiver':currentChat}))
         ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
-        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
-        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
     }
-
+    //adds a new chat to the user's chat list
     function addNewChat(){
         let receiver = findUser.current.value
         const requestOptions = {
@@ -137,7 +134,15 @@ export default function ChatInterface(){
         body: JSON.stringify({ 'authtoken' : authtoken, 'username':receiver })
     };
     const response = fetch('http://localhost:5000/chat/addcontact', requestOptions);
-    console.log(response.json)
+    console.log("Fetched all user chats...")
+    if (response.status == 200){
+        ws.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
+        return 'something'
+    }
+    else if (response.status == 400 || response.status == 404){
+        alert(response.result)
+        return 'nothing'
+    }
 }
     return(
         <>
