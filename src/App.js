@@ -1,11 +1,9 @@
 import {useEffect, useRef, useState} from 'react';
 import './App.css'; 
 import { Routes, Route } from 'react-router-dom';
-import ManageBoth from './components/Login_signup/ManageBoth';
 import Login from './components/Login_signup/Login';
 import { useNavigate } from 'react-router-dom';
 import Signup from './components/Login_signup/Signup';
-// import Socket from './components/Login_signup/socket/Socket';
 import ChatInterface from './components/Chat/ChatInterface';
 import Logout from './components/Login_signup/Logout';
 
@@ -49,8 +47,6 @@ function App() {
       <Route path="/signup" element={<Signup/>} />
       <Route path='/logout' element={<Logout/>}/>
     </Routes>
-    {/* {!authToken && <Login/>}
-    {authToken && <ChatInterface/>} */}
    </>
   );
 }

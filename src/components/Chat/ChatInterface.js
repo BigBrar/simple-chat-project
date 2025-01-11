@@ -1,6 +1,7 @@
 import styles from './ChatInterface.module.css';
 import {useEffect, useRef, useState} from 'react';
-import {io} from 'socket.io-client';
+import useWebSocket from '../chat_components/useWebSocket.js';
+import usePingServer from '../chat_components/usePingServer.js';
 import ChatHeader from '../chat_components/ChatHeader.js';
 import AllChats from '../chat_components/AllChats.js';
 import CurrentChat from '../chat_components/CurrentChat.js';
@@ -13,87 +14,29 @@ export default function ChatInterface(){
     const [chat, setChat] = useState(undefined)
     const [currentChat, setCurrentChat] = useState(users[0]);
     const [ws, setws] = useState(null);
-    useEffect(()=>{
-    //starting the initial connection that will be maintained throughout the session.
-    let socket = new io('http://localhost:5000');
-    
-    socket.on('connect', () => {
-        console.log('Connected to WebSocket server');
-        socket.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))
-    });
-    
-    //this maintains all the websocket responses from the server.
-    socket.on('message', (data)=> {
-        console.log('message received from the server - ',data)
-        console.log("type of data = ",typeof(data))
-        if(data.result == 'connected'){
-            console.log('connected to the server')
-        }
-        else if (data.result == 'chat_extracted'){
-            console.log('chat extracted')
-            awaitResponse.current = false;
-            const jsonObject = data;
-
-            setChat(jsonObject.chat)
-            console.log("Chat messages",jsonObject.chat)
-            console.log(typeof(jsonObject.chat))
-        }
-        
-        else if(data.result == 'ping_response'){
-            console.log("Ping response ....")
-            console.log(data)
-            console.log('totalmessages ',totalMessages.current)
-            console.log('messages count', data.message_count)
-            if (totalMessages.current != data.message_count){
-                console.log('if ran ')
-                totalMessages.current = data.message_count
-                console.log('updated total messages', totalMessages.current)
-                awaitResponse.current = true;
-                console.log("sending chat EXTRACTION")
-                socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
-            }
-        }
-        else if(data.result == 'retrieve_user_chats'){
-            console.log('message from the server - ',data)
-            setUsers(data.chat_users)
-            console.log('value of users is ',users)
-            
-        }
-        else{
-            console.log('message from the server - ',data)
-            console.log(typeof(data))
-        }
-    })
-    //setting so that websocket can be accessed globally outside useEffect
-    setws(socket);
-
-    return () => {
-        socket.close();
-    };
-    },[])
-
-    //pinging the server for chat updates
-    useEffect(() => {
-        console.log('secodn useEffect ran...')
-        if (!ws) return
-        console.log('sending ping')
-        const interval = setInterval(() => {
-          if (ws && ws.connected && currentChat && !awaitResponse.current) {
-            ws.send(JSON.stringify({action:'PING',user1:authtoken, user2: currentChat}))
-            console.log('Sent PING to server')
-          }
-          else if (awaitResponse.current){
-            ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
-          }
-        }, 1000) // Ping every 1 seconds
-    
-        // Cleanup interval on component unmount or when WebSocket changes
-        return () => clearInterval(interval)
-      }, [ws, currentChat, authtoken])
-    
     
     const userInput = useRef();
     const totalMessages = useRef();
+
+    //handles all the ws replies from server.
+    useWebSocket({
+        authtoken,
+        currentChat,
+        awaitResponseRef: awaitResponse,
+        totalMessagesRef: totalMessages,
+        setChat,
+        setUsers,
+        setws
+    });
+    
+    //pinging the server for chat updates
+    usePingServer({
+        ws, 
+        awaitResponse, 
+        currentChat, 
+        authtoken
+    })
+    
     //fetches userChat whenever user clicks on a certain chat
     function accessUserChat(buttonText){
         if (ws && buttonText != currentChat){
@@ -104,6 +47,7 @@ export default function ChatInterface(){
             socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
             console.log('socket send ...')
             setCurrentChat(buttonText)
+            setChat('')
             totalMessages.current = 0;
         
     }
