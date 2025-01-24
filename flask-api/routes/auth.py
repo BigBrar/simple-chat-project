@@ -23,8 +23,15 @@ def signup():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    print('login function ran!!!')
     data = request.get_json()
     user = User.query.filter_by(username=data['username'], password=data['password']).first()
     if user:
+        print('user found')
         return {'status': 200, 'result': 'Login successful', 'auth_token': user.auth_token}
+    print('user not found')
+    if not User.query.filter_by(username=data['username']).first():
+        print('username not found')
+    else:
+        print('incorrect password')
     return {'status': 404, 'result': 'Invalid username or password'}
