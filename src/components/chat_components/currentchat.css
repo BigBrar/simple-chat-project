@@ -62,7 +62,8 @@
     border-style: solid;
     border-radius: 5px;
     text-align: center;
-    width: 40vh;
+    max-width: 40vh;
+    width: 100%;
     /* NEED TO MAKE WIDTH responsive   for smaller screens*/
   }
 
@@ -81,4 +82,17 @@
     color: white;
     padding: 6px;
     opacity: 0.7;
+  }
+
+
+
+
+  @media screen and (max-width: 800px) {
+    .sent{
+     font-size: 13px;
+    }
+    .received{
+     font-size: 13px;
+    }
+
   }

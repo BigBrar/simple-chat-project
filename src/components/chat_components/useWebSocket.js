@@ -11,8 +11,12 @@ const useWebSocket = ({
     setws
 }) => {
     useEffect(() => {
-        const socket = new io('http://localhost:5000');
+        // const socket = new io('https://web-6avxcz6o5pwj.up-de-fra1-k8s-1.apps.run-on-seenode.com/', {
+        //     transports: ['websocket', 'polling'], // Use WebSocket first, then fallback to polling
+        // });
         
+        const socket = new io('http://localhost:5000');
+
         socket.on('connect', () => {
             console.log('Connected to WebSocket server');
             socket.send(JSON.stringify({

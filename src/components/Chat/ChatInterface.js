@@ -17,7 +17,6 @@ export default function ChatInterface(){
     
     const userInput = useRef();
     const totalMessages = useRef();
-
     //handles all the ws replies from server.
     useWebSocket({
         authtoken,
@@ -77,7 +76,7 @@ export default function ChatInterface(){
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 'authtoken' : authtoken, 'username':receiver })
     };
-    const response = fetch('http://localhost:5000/chat/addcontact', requestOptions);
+    const response = fetch('https://localhost:5000/chat/addcontact', requestOptions);
     console.log("Fetched all user chats...")
     if (response.status == 200){
         ws.send(JSON.stringify({'action':'GET_USER_CHATS','authtoken':authtoken}))

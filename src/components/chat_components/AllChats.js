@@ -3,7 +3,7 @@ import React from 'react';
 const AllChats = ({ users, accessUserChat, currentChat }) => {
   return (
     <div className="p-4 bg-gray-50 rounded-lg shadow-sm h-full transition-colors duration-200 ease-in-out">
-  <h2 className="text-xl font-semibold text-gray-800 mb-4 px-2 text-center font-extralight">Your Chats</h2>
+  <h2 className="text-xl text-gray-800 mb-4 px-2 text-center font-extralight">Your Chats</h2>
   <div className="space-y-2">
     {users.map((user) => (
       <div

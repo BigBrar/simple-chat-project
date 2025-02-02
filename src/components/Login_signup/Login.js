@@ -13,7 +13,7 @@ export default function Login(){
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 'username' : credentials.username, 'password' : credentials.password, 'email':credentials.email })
+      body: JSON.stringify({ 'username' : credentials.username, 'password' : credentials.password})
   };
   try {
     const response = await fetch(credentials.url, requestOptions);
@@ -39,7 +39,7 @@ export default function Login(){
     <>
     <div className={styles.mainContainer}>
       
-        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/auth/login',username:username.current.value, password:password.current.value, email:'none'})} className={styles.loginForm}>
+        <form onSubmit={(e)=>sendDataToFlask(e,{url:'https://localhost:5000/auth/login',username:username.current.value, password:password.current.value})} className={styles.loginForm}>
           <h1 style={{fontSize:'1.5rem'}}>Login</h1>
           <input ref={username} className={styles.textInput} type='text' placeholder='Username'/>
           <input ref={password} className={styles.textInput} type='password' placeholder='Password'/>

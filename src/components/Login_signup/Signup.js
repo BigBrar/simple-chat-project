@@ -16,21 +16,16 @@ export default function Login(){
   };
   try {
     const response = await fetch(credentials.url, requestOptions);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
     const data = await response.json();
-    if (data.status != 200){
-        console.log('something went wrong with the request, here is the server response')
-        console.log(data.result)
+    if(data.status == 400){
+      alert("Username or password already exists.")
     }
-    if (data.result == 'account_created'){
+    else if (data.result == 'something_already_exists'){
+        alert("Username or password already exists.")
+    }
+    else if (data.result == 'account_created'){
         alert('user account created, login with same credentials.')
     }
-    if (data.authtoken){
-        console.log("Authtoken = ", data['authtoken']);
-        localStorage.setItem('authToken',data['authtoken']);
-        window.location.href = window.location.href;}
 
 } catch (error) {
     console.error("Error occurred:", error);
@@ -39,7 +34,7 @@ export default function Login(){
   return (
     <div className={styles.mainContainer}>
       
-        <form onSubmit={(e)=>sendDataToFlask(e,{url:'http://localhost:5000/auth/signup',username:username.current.value, password:password.current.value, email:email.current.value})} className={styles.loginForm}>
+        <form onSubmit={(e)=>sendDataToFlask(e,{url:'https://localhost:5000/auth/signup',username:username.current.value, password:password.current.value, email:email.current.value})} className={styles.loginForm}>
           <h1 style={{fontSize:'1.5rem'}}>Sign Up</h1>
           <input ref={username} className={styles.textInput} type='text' placeholder='Username'/>
           <input ref={email} className={styles.textInput} type='email' placeholder='Email'/>
