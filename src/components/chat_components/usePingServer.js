@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const usePingServer = ({ws, awaitResponse, currentChat, authtoken})=>{
+const usePingServer = ({ws, awaitResponse, currentChat, authtoken, setIsLoading})=>{
     useEffect(() => {
         console.log('secodn useEffect ran...')
         if (!ws) return
@@ -9,6 +9,7 @@ const usePingServer = ({ws, awaitResponse, currentChat, authtoken})=>{
           if (ws && ws.connected && currentChat && !awaitResponse.current) {
             ws.send(JSON.stringify({action:'PING',user1:authtoken, user2: currentChat}))
             console.log('Sent PING to server')
+            // setIsLoading(true)
           }
           else if (awaitResponse.current){
             ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))

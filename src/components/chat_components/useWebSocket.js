@@ -8,6 +8,8 @@ const useWebSocket = ({
     totalMessagesRef,
     setChat,
     setUsers,
+    isLoading,
+    setIsLoading,
     setws
 }) => {
     useEffect(() => {
@@ -36,10 +38,12 @@ const useWebSocket = ({
                 case 'chat_extracted':
                     console.log('chat extracted');
                     awaitResponseRef.current = false;
+                    setIsLoading(false);
                     setChat(data.chat);
                     break;
                     
                 case 'ping_response':
+                    setIsLoading(false);
                     if (totalMessagesRef.current !== data.message_count) {
                         totalMessagesRef.current = data.message_count;
                         awaitResponseRef.current = true;

@@ -3,7 +3,7 @@ import eraserImage from '../images/eraser.png';
 import './currentchat.css';
 import loadChat from '..//images/videos/loadingChat.mp4'
 
-export default function CurrentChat({ currentChat, userInput, sendData, clearChat, chat }) {
+export default function CurrentChat({ currentChat, userInput, sendData, clearChat, chat, isLoading }) {
   const chatContainerRef = useRef(null);
   const autoScrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -41,7 +41,7 @@ export default function CurrentChat({ currentChat, userInput, sendData, clearCha
               ))}
           </div>}
 
-          {!chat && <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'100%'}}>
+          {!chat && isLoading && <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'100%'}}>
             <video 
             autoPlay 
             loop 
@@ -52,6 +52,11 @@ export default function CurrentChat({ currentChat, userInput, sendData, clearCha
             <source src={loadChat} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
+            </div>}
+
+
+          {!chat && !isLoading && <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'100%'}}>
+            <h1>No messages here, send a message to make it appear...</h1>
             </div>}
 
 

@@ -11,6 +11,7 @@ export default function ChatInterface(){
     let findUser = useRef()
     const awaitResponse = useRef();
     const [users, setUsers] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
     const [chat, setChat] = useState(undefined)
     const [currentChat, setCurrentChat] = useState(users[0]);
     const [ws, setws] = useState(null);
@@ -23,6 +24,8 @@ export default function ChatInterface(){
         currentChat,
         awaitResponseRef: awaitResponse,
         totalMessagesRef: totalMessages,
+        isLoading:isLoading,
+        setIsLoading,setIsLoading,
         setChat,
         setUsers,
         setws
@@ -33,12 +36,14 @@ export default function ChatInterface(){
         ws, 
         awaitResponse, 
         currentChat, 
-        authtoken
+        authtoken,
+        setIsLoading
     })
     
     //fetches userChat whenever user clicks on a certain chat
     function accessUserChat(buttonText){
         if (ws && buttonText != currentChat){
+            setIsLoading(true)
             let socket = ws;
             console.log("socket is ws")
             // console.log(socket)
@@ -95,7 +100,7 @@ export default function ChatInterface(){
 
             <AllChats styles={styles} users={users} accessUserChat={accessUserChat} currentChat={currentChat}/>
 
-            <CurrentChat currentChat={currentChat} userInput={userInput} sendData={sendData} clearChat={clearChat} styles={styles} chat={chat} />
+            <CurrentChat currentChat={currentChat} userInput={userInput} sendData={sendData} clearChat={clearChat} styles={styles} chat={chat} isLoading={isLoading} />
                 
         </div>
         
