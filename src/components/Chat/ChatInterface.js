@@ -10,10 +10,14 @@ export default function ChatInterface(){
     let authtoken = localStorage.getItem('authToken')
     let findUser = useRef()
     const awaitResponse = useRef();
+    // const [awaitResponse, setAwaitResponse] = useState(false);
+    awaitResponse.current = false;
     const [users, setUsers] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [chat, setChat] = useState(undefined)
     const [currentChat, setCurrentChat] = useState(users[0]);
+    const currentChatRef = useRef(currentChat);
+    useEffect(() => { currentChatRef.current = currentChat; }, [currentChat]);
     const [ws, setws] = useState(null);
     
     const userInput = useRef();
@@ -22,7 +26,8 @@ export default function ChatInterface(){
     useWebSocket({
         authtoken,
         currentChat,
-        awaitResponseRef: awaitResponse,
+        awaitResponse: awaitResponse,
+        // setAwaitResponse: setAwaitResponse,
         totalMessagesRef: totalMessages,
         isLoading:isLoading,
         setIsLoading,setIsLoading,
@@ -34,28 +39,28 @@ export default function ChatInterface(){
     //pinging the server for chat updates
     usePingServer({
         ws, 
-        awaitResponse, 
-        currentChat, 
+        awaitResponse,
+        // setAwaitResponse, 
+        currentChat:currentChat, 
         authtoken,
         setIsLoading
     })
     
     //fetches userChat whenever user clicks on a certain chat
     function accessUserChat(buttonText){
-        if (ws && buttonText != currentChat){
+        if (ws && buttonText != currentChatRef.current){
             setIsLoading(true)
-            let socket = ws;
-            console.log("socket is ws")
-            // console.log(socket)
-            // socket.send('hello')
-            socket.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
-            console.log('socket send ...')
+            console.log("accessUserChat called")
             setCurrentChat(buttonText)
+            ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
+            console.log('accessUesrChat sent chat extraction request')
+            awaitResponse.current = true;
+            // setAwaitResponse(true);
             setChat('')
             totalMessages.current = 0;
         
     }
-    else if (buttonText == currentChat){
+    else if (buttonText == currentChatRef.current){
         //chat is already open so nothing happens
         return 
     }
@@ -63,15 +68,21 @@ export default function ChatInterface(){
     //sends the message to the receiver and extracts whole chat after sending
     function sendData(e){
         e.preventDefault();
+        console.log("sendData called")
         let data = userInput.current.value
         userInput.current.value = '';
         ws.send(JSON.stringify({'action':'MSG_SEND','msg_body':data,'authtoken':authtoken, 'receiver':currentChat}))
-        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+        setChat((oldChat) => [...oldChat, { sender: 'me', message: data }])
+        console.log("message sent..")
+        awaitResponse.current = true;
+        // ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+        // setAwaitResponse(true);
     }
     //clears the whole chat on the server.
     function clearChat(){
         ws.send(JSON.stringify({'action':'CLEAR_CHAT','authtoken':authtoken, 'receiver':currentChat}))
-        ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
+        awaitResponse.current = true;
+        // ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':currentChat,'authtoken':authtoken}))
     }
     //adds a new chat to the user's chat list
     function addNewChat(){
@@ -100,7 +111,7 @@ export default function ChatInterface(){
 
             <AllChats styles={styles} users={users} accessUserChat={accessUserChat} currentChat={currentChat}/>
 
-            <CurrentChat currentChat={currentChat} userInput={userInput} sendData={sendData} clearChat={clearChat} styles={styles} chat={chat} isLoading={isLoading} />
+            <CurrentChat currentChat={currentChat} userInput={userInput} sendData={sendData} clearChat={clearChat} styles={styles} chat={chat} isLoading={isLoading} awaitResponse={awaitResponse}/>
                 
         </div>
         

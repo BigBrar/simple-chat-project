@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 const useWebSocket = ({ 
     authtoken, 
     currentChat,
-    awaitResponseRef,
+    awaitResponse,
     totalMessagesRef,
     setChat,
     setUsers,
@@ -34,24 +34,40 @@ const useWebSocket = ({
                 case 'connected':
                     console.log('connected to the server');
                     break;
+
+                case 'chat_empty':
+                    console.log('chat empty');
+                    // setAwaitResponse(false);
+                    awaitResponse.current = false;
+                    setIsLoading(false);
+                    setChat([]);
+                    break;
                     
                 case 'chat_extracted':
                     console.log('chat extracted');
-                    awaitResponseRef.current = false;
+                    awaitResponse.current = false;
+                    // setAwaitResponse(false);
+                    console.log("Value of awaitResponse is ", awaitResponse.current)
                     setIsLoading(false);
                     setChat(data.chat);
+                    console.log('chat extracted - ', data.chat);
                     break;
                     
                 case 'ping_response':
+                    console.log('ping response ran ...');
                     setIsLoading(false);
                     if (totalMessagesRef.current !== data.message_count) {
+                        console.log('entered if statement');
                         totalMessagesRef.current = data.message_count;
-                        awaitResponseRef.current = true;
+                        // setAwaitResponse(true);
+                        awaitResponse.current = true;
                         socket.send(JSON.stringify({
                             'action': 'CHAT_EXTRACTION',
                             'chat_to_extract': currentChat,
                             'authtoken': authtoken
                         }));
+                        console.log("sent chat extraction request")
+                        
                     }
                     break;
                     
@@ -69,7 +85,7 @@ const useWebSocket = ({
         return () => {
             socket.close();
         };
-    }, [authtoken, currentChat]);
+    }, [authtoken]);
 };
 
 export default useWebSocket;

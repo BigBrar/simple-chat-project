@@ -3,7 +3,7 @@ import eraserImage from '../images/eraser.png';
 import './currentchat.css';
 import loadChat from '..//images/videos/loadingChat.mp4'
 
-export default function CurrentChat({ currentChat, userInput, sendData, clearChat, chat, isLoading }) {
+export default function CurrentChat({ currentChat, userInput, sendData, clearChat, chat, isLoading, awaitResponse }) {
   const chatContainerRef = useRef(null);
   const autoScrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -55,7 +55,7 @@ export default function CurrentChat({ currentChat, userInput, sendData, clearCha
             </div>}
 
 
-          {!chat && !isLoading && <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'100%'}}>
+          {chat.length==0 && !isLoading && <div style={{display:'flex',alignItems:'center',justifyContent:'center', height:'100%'}}>
             <h1>No messages here, send a message to make it appear...</h1>
             </div>}
 
