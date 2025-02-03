@@ -8,6 +8,7 @@ const usePingServer = ({ws, awaitResponse, currentChat, authtoken, setIsLoading}
         console.log('sending ping')
         const interval = setInterval(() => {
           if (ws && ws.connected && currentChat && !awaitResponse.current) {
+            console.log("Current chat is ", currentChat)
             ws.send(JSON.stringify({action:'PING',user1:authtoken, user2: currentChat}))
             console.log('Sent PING to server')
             // setIsLoading(true)
@@ -22,7 +23,7 @@ const usePingServer = ({ws, awaitResponse, currentChat, authtoken, setIsLoading}
     
         // Cleanup interval on component unmount or when WebSocket changes
         return () => clearInterval(interval)
-      }, [ws, currentChat, authtoken])
+      }, [ws, currentChat, authtoken, awaitResponse])
 }
 
 export default usePingServer;

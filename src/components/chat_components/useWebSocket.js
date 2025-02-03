@@ -61,6 +61,7 @@ const useWebSocket = ({
                         totalMessagesRef.current = data.message_count;
                         // setAwaitResponse(true);
                         awaitResponse.current = true;
+                        console.log("Currnet chat is ", currentChat)
                         socket.send(JSON.stringify({
                             'action': 'CHAT_EXTRACTION',
                             'chat_to_extract': currentChat,

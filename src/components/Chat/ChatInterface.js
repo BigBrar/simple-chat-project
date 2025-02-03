@@ -16,8 +16,8 @@ export default function ChatInterface(){
     const [isLoading, setIsLoading] = useState(false)
     const [chat, setChat] = useState(undefined)
     const [currentChat, setCurrentChat] = useState(users[0]);
-    const currentChatRef = useRef(currentChat);
-    useEffect(() => { currentChatRef.current = currentChat; }, [currentChat]);
+    // const currentChatRef = useRef(currentChat);
+    // useEffect(() => { currentChatRef.current = currentChat; }, [currentChat]);
     const [ws, setws] = useState(null);
     
     const userInput = useRef();
@@ -48,19 +48,22 @@ export default function ChatInterface(){
     
     //fetches userChat whenever user clicks on a certain chat
     function accessUserChat(buttonText){
-        if (ws && buttonText != currentChatRef.current){
+        if (ws && buttonText != currentChat){
             setIsLoading(true)
+            setChat('')
             console.log("accessUserChat called")
             setCurrentChat(buttonText)
-            ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
-            console.log('accessUesrChat sent chat extraction request')
             awaitResponse.current = true;
+            console.log('value of awaitResponse is ', awaitResponse.current)
+            ws.send(JSON.stringify({'action':'CHAT_EXTRACTION','chat_to_extract':buttonText,'authtoken':authtoken}))
+            // console.log('accessUesrChat sent chat extraction request')
+            console.log("chat extraction for ", buttonText)
             // setAwaitResponse(true);
-            setChat('')
+            
             totalMessages.current = 0;
         
     }
-    else if (buttonText == currentChatRef.current){
+    else if (buttonText == currentChat){
         //chat is already open so nothing happens
         return 
     }
